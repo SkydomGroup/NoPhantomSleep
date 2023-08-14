@@ -10,4 +10,9 @@ public class NoPhantomSleep extends JavaPlugin{
         // 注册事件监听器，传入一个 CheckSleep 类的实例和当前插件的实例
         Bukkit.getPluginManager().registerEvents(new CheckSleep(), this);
     }
+
+    @Override
+    public void onDisable() {
+        // 当插件禁用时，调用这个方法
+    }
 }
