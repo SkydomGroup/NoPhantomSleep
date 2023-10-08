@@ -8,40 +8,35 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class CheckSleep implements Listener {
-    // 一个用来存储已经睡觉的玩家和他们睡觉的时间的映射
-    private Map<Player, Long> sleepers = new HashMap<>();
+    private NoPhantomSleep plugin;
+
+    public CheckSleep(NoPhantomSleep plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onPlayerBedEnter(PlayerBedEnterEvent event) {
-        // 当一个玩家进入床时，把他们加入到睡觉的玩家映射中，记录当前时间
+        // 当一个玩家进入床时，将他们的名称添加到列表中
         Player player = event.getPlayer();
-        long time = System.currentTimeMillis();
-        sleepers.put(player, time);
+        plugin.getSleepingPlayers().add(player.getName());
     }
 
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
-        // 当一个实体刷新时，检查是否是幻翼
-        if (event.getEntityType() == EntityType.PHANTOM){
-            // 获取刷新的实体
+        // 在这里处理幻翼刷新事件，可以访问plugin.getSleepingPlayers()来获取玩家列表
+        if (event.getEntityType() == EntityType.PHANTOM) {
             Entity entity = event.getEntity();
-            // 对于映射中的每一个玩家
-            for (Player player : sleepers.keySet()) {
-                // 如果玩家和实体在同一个世界，并且距离小于64格
-                if (player.getWorld() == entity.getWorld() && player.getLocation().distance(entity.getLocation()) < 64) {
-                    // 获取当前时间
+            for (String playerName : plugin.getSleepingPlayers()) {
+                Player player = plugin.getServer().getPlayerExact(playerName);
+                if (player != null && player.getWorld() == entity.getWorld()
+                        && player.getLocation().distance(entity.getLocation()) < 64) {
                     long time = System.currentTimeMillis();
-                    // 如果时间差小于30分钟（以毫秒为单位）
-                    if (time - sleepers.get(player) < 1000 * 60 * 30) {
-                        // 取消实体刷新事件
+                    long sleepingTime = plugin.getSleepingTime(playerName); // 获取睡觉时间
+                    if (time - sleepingTime < 1000 * 60 * 30) {
                         event.setCancelled(true);
-                    } else if (time - sleepers.get(player) >= 1000 * 60 * 30) {
-                        // 否则，如果时间差大于等于30分钟，把玩家从映射中移除
-                        sleepers.remove(player);
+                    } else {
+                        plugin.removeSleepingPlayer(playerName); // 移除睡觉玩家
                     }
                 }
             }
