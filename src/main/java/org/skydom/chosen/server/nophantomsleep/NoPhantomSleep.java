@@ -4,8 +4,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class NoPhantomSleep extends JavaPlugin {
     private List<String> sleepingPlayers = new ArrayList<>(); // 存储玩家名称的列表
@@ -37,11 +40,22 @@ public class NoPhantomSleep extends JavaPlugin {
     }
 
     // 保存玩家列表
+// 保存玩家列表
     private void saveSleepingPlayers() {
+        // 清空config.yml文件
+        File configFile = new File(getDataFolder(), "config.yml");
+        if (configFile.exists()) {
+            configFile.delete();
+        }
+
+        // 使用Set来去除重复的ID
+        Set<String> uniqueSleepingPlayers = new HashSet<>(sleepingPlayers);
+
         FileConfiguration config = getConfig();
-        config.set("sleepingPlayers", sleepingPlayers);
+        config.set("sleepingPlayers", new ArrayList<>(uniqueSleepingPlayers));
         saveConfig();
     }
+
 
     // 获取玩家的睡觉时间
     public long getSleepingTime(String playerName) {

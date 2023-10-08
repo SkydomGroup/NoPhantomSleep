@@ -8,6 +8,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CheckSleep implements Listener {
     private NoPhantomSleep plugin;
 
@@ -24,19 +27,19 @@ public class CheckSleep implements Listener {
 
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
-        // 在这里处理幻翼刷新事件，可以访问plugin.getSleepingPlayers()来获取玩家列表
         if (event.getEntityType() == EntityType.PHANTOM) {
             Entity entity = event.getEntity();
-            for (String playerName : plugin.getSleepingPlayers()) {
+            List<String> sleepingPlayersCopy = new ArrayList<>(plugin.getSleepingPlayers()); // 创建副本
+            for (String playerName : sleepingPlayersCopy) {
                 Player player = plugin.getServer().getPlayerExact(playerName);
                 if (player != null && player.getWorld() == entity.getWorld()
                         && player.getLocation().distance(entity.getLocation()) < 64) {
                     long time = System.currentTimeMillis();
-                    long sleepingTime = plugin.getSleepingTime(playerName); // 获取睡觉时间
+                    long sleepingTime = plugin.getSleepingTime(playerName);
                     if (time - sleepingTime < 1000 * 60 * 30) {
                         event.setCancelled(true);
                     } else {
-                        plugin.removeSleepingPlayer(playerName); // 移除睡觉玩家
+                        plugin.removeSleepingPlayer(playerName);
                     }
                 }
             }
