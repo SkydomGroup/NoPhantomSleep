@@ -18,6 +18,9 @@ public class NoPhantomSleep extends JavaPlugin {
         // 注册事件监听器
         Bukkit.getPluginManager().registerEvents(new CheckSleep(this), this);
 
+        // 注册清除睡觉玩家命令
+        getCommand("clearsleepplayer").setExecutor(new ClearSleepPlayerCommand(this));
+
         // 加载玩家列表
         loadSleepingPlayers();
     }
@@ -40,8 +43,7 @@ public class NoPhantomSleep extends JavaPlugin {
     }
 
     // 保存玩家列表
-// 保存玩家列表
-    private void saveSleepingPlayers() {
+    public void saveSleepingPlayers() {
         // 清空config.yml文件
         File configFile = new File(getDataFolder(), "config.yml");
         if (configFile.exists()) {
@@ -55,6 +57,7 @@ public class NoPhantomSleep extends JavaPlugin {
         config.set("sleepingPlayers", new ArrayList<>(uniqueSleepingPlayers));
         saveConfig();
     }
+
 
 
     // 获取玩家的睡觉时间

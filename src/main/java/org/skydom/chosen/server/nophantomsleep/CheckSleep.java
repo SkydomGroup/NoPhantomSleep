@@ -20,9 +20,16 @@ public class CheckSleep implements Listener {
 
     @EventHandler
     public void onPlayerBedEnter(PlayerBedEnterEvent event) {
-        // 当一个玩家进入床时，将他们的名称添加到列表中
         Player player = event.getPlayer();
-        plugin.getSleepingPlayers().add(player.getName());
+        String playerName = player.getName();
+
+        // 如果玩家已经在列表中，先移除
+        if (plugin.getSleepingPlayers().contains(playerName)) {
+            plugin.removeSleepingPlayer(playerName);
+        }
+
+        // 然后将玩家添加到列表
+        plugin.getSleepingPlayers().add(playerName);
     }
 
     @EventHandler
